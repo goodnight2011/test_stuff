@@ -10,5 +10,6 @@
 
   <modules>
     <module>core</module>
+      <module>processor</module>
   </modules>
 </project>

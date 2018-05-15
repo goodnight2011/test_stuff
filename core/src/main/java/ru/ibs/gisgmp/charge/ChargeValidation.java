@@ -2,6 +2,7 @@ package ru.ibs.gisgmp.charge;
 
 import ru.ibs.nsi.validation.ValidationResult;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +17,13 @@ public class ChargeValidation {
             return Arrays.asList(new ValidationResult("supplierBillId", "supplierBillId.format"));
 
         return Collections.emptyList();
+    }
+
+    public static List<ValidationResult> validateBillDate(LocalDate date){
+//        if(date == null)
+//            return Arrays.asList(new ValidationResult(""));
+        return null;
+
     }
 
 

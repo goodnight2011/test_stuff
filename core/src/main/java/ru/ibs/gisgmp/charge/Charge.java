@@ -2,9 +2,11 @@ package ru.ibs.gisgmp.charge;
 
 import ru.ibs.gisgmp.charge.organization.Organization;
 import ru.ibs.gisgmp.charge.payer.UnifiedPayerIdentifier;
+import ru.ibs.processor.FieldConst;
 
 import java.time.LocalDate;
 
+@FieldConst
 public class Charge {
     private String supplierBillId;
     private LocalDate billDate;

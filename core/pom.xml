@@ -14,11 +14,11 @@
         </plugins>
     </build>
 
-    <parent>
+<!--    <parent>
         <groupId>ru.ibs</groupId>
         <artifactId>GisGmpId</artifactId>
         <version>1.0-SNAPSHOT</version>
-    </parent>
+    </parent>-->
 
     <groupId>ru.ibs</groupId>
     <artifactId>core</artifactId>
@@ -27,14 +27,12 @@
     <name>core</name>
 
     <dependencies>
-
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.10</version>
-            <scope>test</scope>
+            <groupId>ru.ibs</groupId>
+            <artifactId>processor</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
-
     </dependencies>
 
 
