@@ -11,6 +11,20 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>ru.ibs</groupId>
+                <artifactId>dbgen-maven-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>dbgen</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>dbgen</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
