@@ -1,11 +1,15 @@
 package ru.ibs;
 
+import jdk.internal.dynalink.DynamicLinkerFactory;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Mojo( name = "dbgen")
 public class DbGenMojo extends AbstractMojo{
@@ -27,6 +31,109 @@ public class DbGenMojo extends AbstractMojo{
 
     private static boolean emptyStr(String str){
         return str == null || str.trim().isEmpty();
+    }
+
+    private enum ElemType{
+        CAT, SHM, TB, COL
+    }
+
+    private final static String DFLT = "DEFAULT";
+
+    private static class Elem{
+        private final String name;
+        private final ElemType type;
+
+        public Elem(String name, ElemType type) {
+            if(emptyStr(name))
+                throw new IllegalArgumentException("name of element can't be empty");
+
+            this.name = name;
+            this.type = type;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public ElemType getType() {
+            return type;
+        }
+
+        public boolean isCatalog(){
+           return type.equals(ElemType.CAT);
+        }
+
+        public boolean isSchema(){
+            return type.equals(ElemType.SHM);
+        }
+
+        public boolean isDefault(){
+            return name.equals(DFLT);
+        }
+    }
+
+    private static List<Elem> getCatalogs(DatabaseMetaData meta) throws SQLException {
+        List<Elem> ret = new ArrayList<>();
+        ResultSet catalogsRs = meta.getCatalogs();
+        while(catalogsRs.next()) {
+            String cname = catalogsRs.getString("TABLE_CAT");
+            if(!emptyStr(cname))
+                ret.add(new Elem(cname, ElemType.CAT));
+        }
+
+        return ret;
+    }
+
+    private static Map<Elem, List<Elem>> getSchemas(DatabaseMetaData meta, List<Elem> catalogs) throws SQLException {
+        if (!catalogs.stream().allMatch(Elem::isCatalog))
+            throw new RuntimeException("some passed elements aren't of a catalog type");
+
+        Map<Elem, List<Elem>> ret = new HashMap<>();
+        Elem dlftCat = new Elem(DFLT, ElemType.CAT);
+        ret.put(dlftCat, new ArrayList<>());
+        Map<String, Elem> mappedCats = catalogs.stream().collect(Collectors.toMap(Elem::getName, Function.identity()));
+        mappedCats = new HashMap<>(mappedCats);
+        mappedCats.put(DFLT, dlftCat);
+
+        ResultSet schemasRs = meta.getSchemas();
+        while (schemasRs.next()) {
+            String cname = schemasRs.getString("TABLE_CATALOG");
+            cname = !emptyStr(cname) ? cname : DFLT;
+            Elem elem = mappedCats.get(cname);
+            String sname = schemasRs.getString("TABLE_SCHEM");
+            if(!emptyStr(sname))
+                ret.get(elem).add(new Elem(sname, ElemType.SHM));
+        }
+
+        ret.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+        return ret;
+    }
+
+    private static Map<List<Elem>, List<Elem>> getTables(DatabaseMetaData meta, Map<Elem, List<Elem>> catSch){
+       if(!catSch.keySet().stream().allMatch(Elem::isCatalog))
+           throw new IllegalArgumentException("some of passed elements aren't of a catalog type");
+
+       if(!catSch.values().stream().flatMap(List::stream).allMatch(Elem::isSchema))
+           throw new IllegalArgumentException("some of passed elemtns aren't of schema type");
+
+       Map<List<Elem>, List<Elem>> ret = new HashMap<>();
+        catSch.forEach((cat, schs) -> schs.forEach(sch -> {
+            try {
+                List<Elem> key = Arrays.asList(cat, sch);
+                ret.put(key, new ArrayList<>());
+                ResultSet tableRs = meta.getTables(cat.getName(), sch.getName(), null, null);
+                while (tableRs.next()) {
+                    String tname = tableRs.getString("TABLE_NAME");
+                    String ttype = tableRs.getString("TABLE_TYPE");
+                    if (!emptyStr(tname) && !ttype.contains("SYSTEM") && !ttype.contains("INDEX"))
+                        ret.get(key).add(new Elem(tname, ElemType.TB));
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }));
+
+       return null;
     }
 
     public static void main(String[] args){
@@ -110,65 +217,12 @@ public class DbGenMojo extends AbstractMojo{
                 try {
                     ResultSet columnsRs = metaData.getColumns(root.get(0), (root.size() > 1 ? root.get(1) : null), tableName, null);
                     while(columnsRs.next()){
-                        System.out.println();
-                    }
-//                      *  <OL>
-//     *  <LI><B>TABLE_CAT</B> String {@code =>} table catalog (may be <code>null</code>)
-//     *  <LI><B>TABLE_SCHEM</B> String {@code =>} table schema (may be <code>null</code>)
-//     *  <LI><B>TABLE_NAME</B> String {@code =>} table name
-//     *  <LI><B>COLUMN_NAME</B> String {@code =>} column name
-//     *  <LI><B>DATA_TYPE</B> int {@code =>} SQL type from java.sql.Types
-//                            *  <LI><B>TYPE_NAME</B> String {@code =>} Data source dependent type name,
-//     *  for a UDT the type name is fully qualified
-//     *  <LI><B>COLUMN_SIZE</B> int {@code =>} column size.
-//     *  <LI><B>BUFFER_LENGTH</B> is not used.
-//     *  <LI><B>DECIMAL_DIGITS</B> int {@code =>} the number of fractional digits. Null is returned for data types where
-//                            * DECIMAL_DIGITS is not applicable.
-//                            *  <LI><B>NUM_PREC_RADIX</B> int {@code =>} Radix (typically either 10 or 2)
-//                            *  <LI><B>NULLABLE</B> int {@code =>} is NULL allowed.
-//                            *      <UL>
-//     *      <LI> columnNoNulls - might not allow <code>NULL</code> values
-//                            *      <LI> columnNullable - definitely allows <code>NULL</code> values
-//                            *      <LI> columnNullableUnknown - nullability unknown
-//                            *      </UL>
-//     *  <LI><B>REMARKS</B> String {@code =>} comment describing column (may be <code>null</code>)
-//     *  <LI><B>COLUMN_DEF</B> String {@code =>} default value for the column, which should be interpreted as a string when the value is enclosed in single quotes (may be <code>null</code>)
-//     *  <LI><B>SQL_DATA_TYPE</B> int {@code =>} unused
-//                            *  <LI><B>SQL_DATETIME_SUB</B> int {@code =>} unused
-//                            *  <LI><B>CHAR_OCTET_LENGTH</B> int {@code =>} for char types the
-//                            *       maximum number of bytes in the column
-//     *  <LI><B>ORDINAL_POSITION</B> int {@code =>} index of column in table
-//                            *      (starting at 1)
-//     *  <LI><B>IS_NULLABLE</B> String  {@code =>} ISO rules are used to determine the nullability for a column.
-//     *       <UL>
-//     *       <LI> YES           --- if the column can include NULLs
-//                            *       <LI> NO            --- if the column cannot include NULLs
-//                            *       <LI> empty string  --- if the nullability for the
-//                            * column is unknown
-//     *       </UL>
-//     *  <LI><B>SCOPE_CATALOG</B> String {@code =>} catalog of table that is the scope
-//                            *      of a reference attribute (<code>null</code> if DATA_TYPE isn't REF)
-//                            *  <LI><B>SCOPE_SCHEMA</B> String {@code =>} schema of table that is the scope
-//                            *      of a reference attribute (<code>null</code> if the DATA_TYPE isn't REF)
-//                            *  <LI><B>SCOPE_TABLE</B> String {@code =>} table name that this the scope
-//     *      of a reference attribute (<code>null</code> if the DATA_TYPE isn't REF)
-//                            *  <LI><B>SOURCE_DATA_TYPE</B> short {@code =>} source type of a distinct type or user-generated
-//                            *      Ref type, SQL type from java.sql.Types (<code>null</code> if DATA_TYPE
-//                            *      isn't DISTINCT or user-generated REF)
-//                            *   <LI><B>IS_AUTOINCREMENT</B> String  {@code =>} Indicates whether this column is auto incremented
-//     *       <UL>
-//     *       <LI> YES           --- if the column is auto incremented
-//                            *       <LI> NO            --- if the column is not auto incremented
-//     *       <LI> empty string  --- if it cannot be determined whether the column is auto incremented
-//     *       </UL>
-//     *   <LI><B>IS_GENERATEDCOLUMN</B> String  {@code =>} Indicates whether this is a generated column
-//     *       <UL>
-//     *       <LI> YES           --- if this a generated column
-//                            *       <LI> NO            --- if this not a generated column
-//     *       <LI> empty string  --- if it cannot be determined whether this is a generated column
-//     *       </UL
-                    while(columnsRs.next()){
-
+                        String cname = columnsRs.getString("COLUMN_NAME");
+                        String ctype = columnsRs.getString("DATA_TYPE");
+                        System.out.println("catalog:" + root.get(0)
+                                + (root.size() > 1 ? " scheme: " + root.get(1) : "")
+                                + " table:" + tableName
+                                + " column: " + cname  + " type: " + ctype);
                     }
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
