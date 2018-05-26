@@ -1,5 +1,6 @@
 package ru.ibs.gisgmp.charge;
 
+import ru.ibs.dbgen.Users_;
 import ru.ibs.nsi.validation.ValidationResult;
 
 import java.time.LocalDate;
@@ -22,6 +23,9 @@ public class ChargeValidation {
     public static List<ValidationResult> validateBillDate(LocalDate date){
 //        if(date == null)
 //            return Arrays.asList(new ValidationResult(""));
+        String some = Users_.ID;
+        String another = ChargeFields.BILL_DATE;
+        String some1 = ChargeFields.FIELD;
         return null;
 
     }

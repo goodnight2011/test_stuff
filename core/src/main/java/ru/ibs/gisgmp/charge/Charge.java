@@ -21,6 +21,7 @@ public class Charge {
     private String tofkCode;
     private String tofkLs;
     private UnifiedPayerIdentifier unifiedPayerIdentifier;
+    private boolean field;
 
     public String getSupplierBillId() {
         return supplierBillId;
