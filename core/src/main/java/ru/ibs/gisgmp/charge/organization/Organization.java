@@ -1,10 +1,14 @@
 package ru.ibs.gisgmp.charge.organization;
 
+import ru.ibs.gisgmp.charge.Inn;
+import ru.ibs.gisgmp.charge.Kpp;
+import ru.ibs.gisgmp.charge.Ogrn;
+
 public class Organization {
     private String name;
-    private String inn;
-    private String kpp;
-    private String ogrn;
+    private Inn inn;
+    private Kpp kpp;
+    private Ogrn ogrn;
     private Account account;
 
     public String getName() {
@@ -15,27 +19,27 @@ public class Organization {
         this.name = name;
     }
 
-    public String getInn() {
+    public Inn getInn() {
         return inn;
     }
 
-    public void setInn(String inn) {
+    public void setInn(Inn inn) {
         this.inn = inn;
     }
 
-    public String getKpp() {
+    public Kpp getKpp() {
         return kpp;
     }
 
-    public void setKpp(String kpp) {
+    public void setKpp(Kpp kpp) {
         this.kpp = kpp;
     }
 
-    public String getOgrn() {
+    public Ogrn getOgrn() {
         return ogrn;
     }
 
-    public void setOgrn(String ogrn) {
+    public void setOgrn(Ogrn ogrn) {
         this.ogrn = ogrn;
     }
 

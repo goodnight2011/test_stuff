@@ -1,20 +1,20 @@
-package ru.ibs.gisgmp.charge;
+package ru.ibs.gisgmp.charge.requisites;
 
 import java.time.LocalDate;
 
 public class BudgetIndex {
-    private String status;
+    private PayerStatus status;
     private String purpose;
     private String taxPeriod;
     private String taxDocNumber;
     private LocalDate taxDocDate;
     private String paymentType;
 
-    public String getStatus() {
+    public PayerStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(PayerStatus status) {
         this.status = status;
     }
 

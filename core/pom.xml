@@ -1,8 +1,52 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jsweet-plugins-release</id>
+            <name>plugins-release</name>
+            <url>http://repository.jsweet.org/artifactory/plugins-release-local</url>
+        </pluginRepository>
+        <pluginRepository>
+            <snapshots />
+            <id>jsweet-plugins-snapshots</id>
+            <name>plugins-snapshot</name>
+            <url>http://repository.jsweet.org/artifactory/plugins-snapshot-local</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <repositories>
+        <repository>
+            <id>jsweet-central</id>
+            <name>libs-release</name>
+            <url>http://repository.jsweet.org/artifactory/libs-release-local</url>
+        </repository>
+        <repository>
+            <snapshots />
+            <id>jsweet-snapshots</id>
+            <name>libs-snapshot</name>
+            <url>http://repository.jsweet.org/artifactory/libs-snapshot-local</url>
+        </repository>
+    </repositories>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/java</source>
+                                <source>${project.build.directory}/generated-sources/annotations</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>ru.ibs</groupId>
                 <artifactId>dbgen-maven-plugin</artifactId>
@@ -28,14 +72,40 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <compileSourceRoots>
+<!--                    <compileSourceRoots>
                         <compileSourceRoot>${project.build.sourceDirectory}</compileSourceRoot>
                         <compileSourceRoot>${project.build.directory}/generated-sources/java</compileSourceRoot>
                         <compileSourceRoot>${project.build.directory}/generated-sources/annotations</compileSourceRoot>
-                    </compileSourceRoots>
+                    </compileSourceRoots>-->
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jsweet</groupId>
+                <artifactId>jsweet-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <configuration>
+                    <verbose>true</verbose>
+                    <tsOut>target/ts</tsOut>
+                    <outDir>target/js</outDir>
+                    <candiesJsOut>webapp</candiesJsOut>
+                    <targetVersion>ES6</targetVersion>
+<!--                    <includes>
+                       <include>${project.build.sourceDirectory}</include>
+                        <include>${project.build.directory}</include>
+                        <include>${project.build.directory}</include>
+                    </includes>-->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-js</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jsweet</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -58,6 +128,11 @@
             <artifactId>processor</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jsweet</groupId>
+            <artifactId>jsweet-core</artifactId>
+            <version>5-20170726</version>
         </dependency>
     </dependencies>
 

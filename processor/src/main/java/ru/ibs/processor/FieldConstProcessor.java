@@ -2,10 +2,7 @@ package ru.ibs.processor;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -42,7 +39,7 @@ public class FieldConstProcessor extends AbstractProcessor {
                 List<? extends Element> subElements = classElem.getEnclosedElements();
                 List<String> fieldsNames = new ArrayList<>();
                 for (Element subElem : subElements) {
-                    if (subElem != null && subElem.getKind() == ElementKind.FIELD) {
+                    if (subElem != null && subElem.getKind() == ElementKind.FIELD && !subElem.getModifiers().contains(Modifier.STATIC)) {
                         fieldsNames.add(subElem.getSimpleName().toString());
                     }
                 }

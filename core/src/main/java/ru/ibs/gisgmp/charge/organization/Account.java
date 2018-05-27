@@ -2,7 +2,7 @@ package ru.ibs.gisgmp.charge.organization;
 
 public class Account {
     private Bank bank;
-    private String accountNumber;
+    private AccountNumber accountNumber;
 
     public Bank getBank() {
         return bank;
@@ -12,11 +12,11 @@ public class Account {
         this.bank = bank;
     }
 
-    public String getAccountNumber() {
+    public AccountNumber getAccountNumber() {
         return accountNumber;
     }
 
-    public void setAccountNumber(String accountNumber) {
+    public void setAccountNumber(AccountNumber accountNumber) {
         this.accountNumber = accountNumber;
     }
 }

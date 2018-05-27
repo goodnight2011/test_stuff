@@ -1,14 +1,23 @@
 package ru.ibs.gisgmp.charge;
 
+import ru.ibs.common.StringBased;
+import ru.ibs.gisgmp.charge.organization.Oktmo;
 import ru.ibs.gisgmp.charge.organization.Organization;
 import ru.ibs.gisgmp.charge.payer.UnifiedPayerIdentifier;
+import ru.ibs.nsi.validation.CompositeValidator;
+import ru.ibs.nsi.validation.DelegateValidator;
+import ru.ibs.nsi.validation.NonNullValidator;
+import ru.ibs.nsi.validation.ValidationResult;
 import ru.ibs.processor.FieldConst;
+import static ru.ibs.gisgmp.charge.ChargeFields.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @FieldConst
 public class Charge {
-    private String supplierBillId;
+    private SupplierBillId supplierBillId;
     private LocalDate billDate;
     private LocalDate docDispatchDate;
     private Organization supplierOrgInfo;
@@ -16,18 +25,15 @@ public class Charge {
     private long totalAmount;
     private Meaning meaning;
     private String reason;
-    private String kbk;
-    private String oktmo;
-    private String tofkCode;
-    private String tofkLs;
+    private Kbk kbk;
+    private Oktmo oktmo;
     private UnifiedPayerIdentifier unifiedPayerIdentifier;
-    private boolean field;
 
-    public String getSupplierBillId() {
+    public SupplierBillId getSupplierBillId() {
         return supplierBillId;
     }
 
-    public void setSupplierBillId(String supplierBillId) {
+    public void setSupplierBillId(SupplierBillId supplierBillId) {
         this.supplierBillId = supplierBillId;
     }
 
@@ -87,36 +93,20 @@ public class Charge {
         this.reason = reason;
     }
 
-    public String getKbk() {
+    public Kbk getKbk() {
         return kbk;
     }
 
-    public void setKbk(String kbk) {
+    public void setKbk(Kbk kbk) {
         this.kbk = kbk;
     }
 
-    public String getOktmo() {
+    public Oktmo getOktmo() {
         return oktmo;
     }
 
-    public void setOktmo(String oktmo) {
+    public void setOktmo(Oktmo oktmo) {
         this.oktmo = oktmo;
-    }
-
-    public String getTofkCode() {
-        return tofkCode;
-    }
-
-    public void setTofkCode(String tofkCode) {
-        this.tofkCode = tofkCode;
-    }
-
-    public String getTofkLs() {
-        return tofkLs;
-    }
-
-    public void setTofkLs(String tofkLs) {
-        this.tofkLs = tofkLs;
     }
 
     public UnifiedPayerIdentifier getUnifiedPayerIdentifier() {
@@ -125,5 +115,28 @@ public class Charge {
 
     public void setUnifiedPayerIdentifier(UnifiedPayerIdentifier unifiedPayerIdentifier) {
         this.unifiedPayerIdentifier = unifiedPayerIdentifier;
+    }
+
+    public static List<ValidationResult> validate(Charge charge){
+//        return CompositeValidator.validate(charge,
+//                new DelegateValidator<>(SUPPLIER_BILL_ID, StringBased::validate, Charge::getSupplierBillId),
+//                Charge::validateBillDate,
+//                new CompositeValidator<>(new NonNullValidator<>(SUPPLIER_ORG_INFO, SUPPLIER_ORG_INFO+".empty"),
+//                        Organization::)
+//
+//        );
+        return null;
+    }
+
+    public static List<ValidationResult> validateBillDate(Charge charge){
+       List<ValidationResult> res = new ArrayList<>();
+       res.addAll(NonNullValidator.validate(charge.getBillDate(), BILL_DATE, BILL_DATE + ".empty"));
+       if(res.isEmpty()){
+           if(LocalDate.of(2013, 1, 1).isAfter(charge.getBillDate()))
+               res.add(new ValidationResult(BILL_DATE, BILL_DATE + ".early"));
+           //TODO: Добавить проверку, что не превышает дату загрузки более чем на один день
+       }
+
+       return res;
     }
 }

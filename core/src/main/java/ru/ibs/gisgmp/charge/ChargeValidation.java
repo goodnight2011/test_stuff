@@ -25,7 +25,6 @@ public class ChargeValidation {
 //            return Arrays.asList(new ValidationResult(""));
         String some = Users_.ID;
         String another = ChargeFields.BILL_DATE;
-        String some1 = ChargeFields.FIELD;
         return null;
 
     }
