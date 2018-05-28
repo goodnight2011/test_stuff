@@ -1,9 +1,6 @@
-package ru.ibs.nsi.validation;
+package ru.ibs.gisgmp.common.validation;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CorrectIfAnyValidator<T> implements Validator<T>{
     private List<Validator<T>> validators;
@@ -14,7 +11,8 @@ public class CorrectIfAnyValidator<T> implements Validator<T>{
 
     @SafeVarargs
     public CorrectIfAnyValidator(Validator<T>... validators){
-        this(Arrays.stream(validators).collect(Collectors.toList()));
+//        this(Arrays.stream(validators).collect(Collectors.toList()));
+        this((List)null);
     }
 
 
@@ -24,15 +22,17 @@ public class CorrectIfAnyValidator<T> implements Validator<T>{
     }
 
     public static<T> List<ValidationResult> validate(T obj, List<Validator<T>> validators){
-        if(validators.stream().anyMatch(val -> val.validate(obj).isEmpty()))
-            return Collections.emptyList();
-
-        return validators.stream().map(val -> val.validate(obj)).
-                flatMap(List::stream).collect(Collectors.toList());
+//        if(validators.stream().anyMatch(val -> val.validate(obj).isEmpty()))
+//            return Collections.emptyList();
+//
+//        return validators.stream().map(val -> val.validate(obj)).
+//                flatMap(List::stream).collect(Collectors.toList());
+        return null;
     }
 
     @SafeVarargs
     public static<T> List<ValidationResult> validate(T obj, Validator<T>... validators){
-       return validate(obj, Arrays.stream(validators).collect(Collectors.toList()));
+//       return validate(obj, Arrays.stream(validators).collect(Collectors.toList()));
+        return null;
     }
 }

@@ -1,10 +1,10 @@
 package ru.ibs.gisgmp.charge;
 
-import ru.ibs.common.StringBased;
-import ru.ibs.nsi.validation.*;
+import ru.ibs.gisgmp.common.validation.RegExpValidator;
+import ru.ibs.gisgmp.common.StringBased;
+import ru.ibs.gisgmp.common.validation.ValidationResult;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 public class SupplierBillId extends StringBased{
     @Override
@@ -21,7 +21,8 @@ public class SupplierBillId extends StringBased{
     }
 
     public static List<ValidationResult> validateFormat(String str){
-       return CorrectIfAnyValidator.validate(str, SupplierBillId::validateFormat1, SupplierBillId::validateFormat2);
+//       return CorrectIfAnyValidator.validate(str, SupplierBillId::validateFormat1, SupplierBillId::validateFormat2);
+        return null;
     }
 
 }

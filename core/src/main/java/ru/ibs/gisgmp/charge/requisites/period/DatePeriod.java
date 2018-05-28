@@ -1,26 +1,23 @@
 package ru.ibs.gisgmp.charge.requisites.period;
 
-import ru.ibs.nsi.validation.CompositeValidator;
-import ru.ibs.nsi.validation.NonNullValidator;
-import ru.ibs.nsi.validation.ValidationResult;
+import ru.ibs.gisgmp.common.validation.NonNullValidator;
+import ru.ibs.gisgmp.common.validation.ValidationResult;
 import ru.ibs.processor.FieldConst;
 
-import java.text.DateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import static ru.ibs.gisgmp.charge.requisites.period.DatePeriodFields.*;
 
 @FieldConst
 public class DatePeriod {
-   private LocalDate date;
+   private Date date;
    private boolean withDelimiter;
 
-    public LocalDate getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
@@ -37,6 +34,7 @@ public class DatePeriod {
     }
 
     public String asString(){
-        return DateTimeFormatter.ofPattern(withDelimiter ? "dd.MM.yyyy" : "ddMMyyyy").format(date);
+//        return DateTimeFormatter.ofPattern(withDelimiter ? "dd.MM.yyyy" : "ddMMyyyy").format(date);
+        return null;
     }
 }

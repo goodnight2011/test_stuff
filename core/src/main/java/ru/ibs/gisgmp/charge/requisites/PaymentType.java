@@ -1,8 +1,8 @@
 package ru.ibs.gisgmp.charge.requisites;
 
-import ru.ibs.common.StringBased;
-import ru.ibs.nsi.validation.RegExpValidator;
-import ru.ibs.nsi.validation.ValidationResult;
+import ru.ibs.gisgmp.common.StringBased;
+import ru.ibs.gisgmp.common.validation.RegExpValidator;
+import ru.ibs.gisgmp.common.validation.ValidationResult;
 
 import java.util.List;
 

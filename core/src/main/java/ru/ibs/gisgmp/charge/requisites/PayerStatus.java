@@ -1,14 +1,10 @@
 package ru.ibs.gisgmp.charge.requisites;
 
-import ru.ibs.common.StringBased;
-import ru.ibs.nsi.validation.ValidationResult;
-import ru.ibs.nsi.validation.Validator;
+import ru.ibs.gisgmp.common.StringBased;
+import ru.ibs.gisgmp.common.validation.ValidationResult;
 
-import java.text.Format;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class PayerStatus extends StringBased{
     @Override
@@ -16,9 +12,10 @@ public class PayerStatus extends StringBased{
         return validate(text);
     }
 
-    public static final List<String> POSSIBLE_VALUES = IntStream.range(1, 29).
+    public static final List<String> POSSIBLE_VALUES = null;
+/*    IntStream.range(1, 29).
             mapToObj(cnt -> String.format("%02d", cnt)).
-            collect(Collectors.toList());
+            collect(Collectors.toList());*/
 
     public static List<ValidationResult> validateFormat(String str){
        return  POSSIBLE_VALUES.contains(str) ? Collections.emptyList() :

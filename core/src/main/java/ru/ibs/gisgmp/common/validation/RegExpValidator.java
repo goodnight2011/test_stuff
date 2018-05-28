@@ -1,4 +1,4 @@
-package ru.ibs.nsi.validation;
+package ru.ibs.gisgmp.common.validation;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,8 +30,8 @@ public class RegExpValidator implements Validator<String>{
     }
 
     public static List<ValidationResult> validate(String text, String regexp, String path, String errCode){
-        if(text.matches(regexp))
-            Collections.singletonList(new ValidationResult(path, errCode));
+//        if(text.matches(regexp))
+//            Collections.singletonList(new ValidationResult(path, errCode));
 
         return Collections.emptyList();
     }

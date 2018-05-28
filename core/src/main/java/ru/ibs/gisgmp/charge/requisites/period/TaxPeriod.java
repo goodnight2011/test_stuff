@@ -1,8 +1,7 @@
 package ru.ibs.gisgmp.charge.requisites.period;
 
-import ru.ibs.nsi.validation.ValidationResult;
+import ru.ibs.gisgmp.common.validation.ValidationResult;
 import ru.ibs.processor.FieldConst;
-import static ru.ibs.gisgmp.charge.requisites.period.TaxPeriodFields.*;
 
 import java.util.Collections;
 import java.util.List;

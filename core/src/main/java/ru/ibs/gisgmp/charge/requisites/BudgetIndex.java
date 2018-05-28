@@ -1,13 +1,14 @@
 package ru.ibs.gisgmp.charge.requisites;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 public class BudgetIndex {
     private PayerStatus status;
     private String purpose;
     private String taxPeriod;
     private String taxDocNumber;
-    private LocalDate taxDocDate;
+    private Date taxDocDate;
     private String paymentType;
 
     public PayerStatus getStatus() {
@@ -42,11 +43,11 @@ public class BudgetIndex {
         this.taxDocNumber = taxDocNumber;
     }
 
-    public LocalDate getTaxDocDate() {
+    public Date getTaxDocDate() {
         return taxDocDate;
     }
 
-    public void setTaxDocDate(LocalDate taxDocDate) {
+    public void setTaxDocDate(Date taxDocDate) {
         this.taxDocDate = taxDocDate;
     }
 

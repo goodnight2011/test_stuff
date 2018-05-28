@@ -1,11 +1,9 @@
 package ru.ibs.gisgmp.charge;
 
-import ru.ibs.common.StringBased;
-import ru.ibs.nsi.validation.RegExpValidator;
-import ru.ibs.nsi.validation.ValidationResult;
-import ru.ibs.nsi.validation.Validator;
+import ru.ibs.gisgmp.common.StringBased;
+import ru.ibs.gisgmp.common.validation.RegExpValidator;
+import ru.ibs.gisgmp.common.validation.ValidationResult;
 
-import java.text.Format;
 import java.util.List;
 
 public class Ogrn extends StringBased{

@@ -1,8 +1,7 @@
 package ru.ibs.gisgmp.charge.organization;
 
-import ru.ibs.nsi.validation.*;
+import ru.ibs.gisgmp.common.validation.ValidationResult;
 import ru.ibs.processor.FieldConst;
-import static ru.ibs.gisgmp.charge.organization.BankFields.*;
 
 import java.util.List;
 
@@ -42,15 +41,16 @@ public class Bank {
     }
 
     public static List<ValidationResult> validate(Bank bank) {
-        Validator<Bank> bik = NonNullValidator.withNonNull(
-                new DelegateValidator<>(BIK, Bik::validate, Bank::getBik),
-                BIK,
-                BIK + ".empty"
-        ) ;
-
-        Validator<Bank> corrAcc = new DelegateValidator<>(CORRESPONDENT_BANK_ACCOUNT,
-                AccountNumber::validate, Bank::getCorrespondentBankAccount);
-
-        return CompositeValidator.validate(bank, bik, corrAcc);
+//        Validator<Bank> bik = NonNullValidator.withNonNull(
+//                new DelegateValidator<>(BIK, Bik::validate, Bank::getBik),
+//                BIK,
+//                BIK + ".empty"
+//        ) ;
+//
+//        Validator<Bank> corrAcc = new DelegateValidator<>(CORRESPONDENT_BANK_ACCOUNT,
+//                AccountNumber::validate, Bank::getCorrespondentBankAccount);
+//
+//        return CompositeValidator.validate(bank, bik, corrAcc);
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-package ru.ibs.nsi.validation;
+package ru.ibs.gisgmp.common.validation;
 
 import java.util.Collections;
 import java.util.List;

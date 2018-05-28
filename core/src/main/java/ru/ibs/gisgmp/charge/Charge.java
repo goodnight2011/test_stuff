@@ -1,25 +1,22 @@
 package ru.ibs.gisgmp.charge;
 
-import ru.ibs.common.StringBased;
 import ru.ibs.gisgmp.charge.organization.Oktmo;
 import ru.ibs.gisgmp.charge.organization.Organization;
 import ru.ibs.gisgmp.charge.payer.UnifiedPayerIdentifier;
-import ru.ibs.nsi.validation.CompositeValidator;
-import ru.ibs.nsi.validation.DelegateValidator;
-import ru.ibs.nsi.validation.NonNullValidator;
-import ru.ibs.nsi.validation.ValidationResult;
+import ru.ibs.gisgmp.common.validation.NonNullValidator;
+import ru.ibs.gisgmp.common.validation.ValidationResult;
 import ru.ibs.processor.FieldConst;
 import static ru.ibs.gisgmp.charge.ChargeFields.*;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @FieldConst
 public class Charge {
     private SupplierBillId supplierBillId;
-    private LocalDate billDate;
-    private LocalDate docDispatchDate;
+    private Date billDate;
+    private Date docDispatchDate;
     private Organization supplierOrgInfo;
     private String billFor;
     private long totalAmount;
@@ -37,19 +34,19 @@ public class Charge {
         this.supplierBillId = supplierBillId;
     }
 
-    public LocalDate getBillDate() {
+    public Date getBillDate() {
         return billDate;
     }
 
-    public void setBillDate(LocalDate billDate) {
+    public void setBillDate(Date billDate) {
         this.billDate = billDate;
     }
 
-    public LocalDate getDocDispatchDate() {
+    public Date getDocDispatchDate() {
         return docDispatchDate;
     }
 
-    public void setDocDispatchDate(LocalDate docDispatchDate) {
+    public void setDocDispatchDate(Date docDispatchDate) {
         this.docDispatchDate = docDispatchDate;
     }
 
@@ -132,8 +129,9 @@ public class Charge {
        List<ValidationResult> res = new ArrayList<>();
        res.addAll(NonNullValidator.validate(charge.getBillDate(), BILL_DATE, BILL_DATE + ".empty"));
        if(res.isEmpty()){
-           if(LocalDate.of(2013, 1, 1).isAfter(charge.getBillDate()))
-               res.add(new ValidationResult(BILL_DATE, BILL_DATE + ".early"));
+
+//           if(LocalDate.of(2013, 1, 1).isAfter(charge.getBillDate()))
+//               res.add(new ValidationResult(BILL_DATE, BILL_DATE + ".early"));
            //TODO: Добавить проверку, что не превышает дату загрузки более чем на один день
        }
 
