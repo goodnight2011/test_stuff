@@ -1,5 +1,7 @@
 package ru.ibs.gisgmp.common.validation;
 
+import ru.ibs.gisgmp.common.utils.ArrUtils;
+
 import java.util.List;
 import java.util.function.Function;
 
@@ -20,14 +22,11 @@ public class DelegateValidator<T, M> implements Validator<T>{
     }
 
     private static ValidationResult convertResult(ValidationResult res, String pathPrefix){
-        return null;
-//        return new ValidationResult(pathPrefix + (res.getPath().isEmpty() ? "" : "." + res.getPath()),
-//                res.getErrCode());
+        return new ValidationResult(pathPrefix + (res.getPath().isEmpty() ? "" : "." + res.getPath()),
+                res.getErrCode());
     }
 
     public static<T, M> List<ValidationResult> validate(T obj, String pathPrefix, Validator<M> validator, Function<T, M> converter){
-        return null;
-//        return validator.validate(converter.apply(obj)).stream().
-//                map(res -> convertResult(res, pathPrefix)).collect(Collectors.toList());
+        return ArrUtils.map(validator.validate(converter.apply(obj)), res -> convertResult(res, pathPrefix));
     }
 }

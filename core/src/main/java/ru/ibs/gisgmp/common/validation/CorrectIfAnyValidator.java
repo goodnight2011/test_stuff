@@ -1,5 +1,8 @@
 package ru.ibs.gisgmp.common.validation;
 
+import ru.ibs.gisgmp.common.utils.ArrUtils;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class CorrectIfAnyValidator<T> implements Validator<T>{
@@ -11,8 +14,7 @@ public class CorrectIfAnyValidator<T> implements Validator<T>{
 
     @SafeVarargs
     public CorrectIfAnyValidator(Validator<T>... validators){
-//        this(Arrays.stream(validators).collect(Collectors.toList()));
-        this((List)null);
+        this(ArrUtils.arrToList(validators));
     }
 
 
@@ -22,17 +24,14 @@ public class CorrectIfAnyValidator<T> implements Validator<T>{
     }
 
     public static<T> List<ValidationResult> validate(T obj, List<Validator<T>> validators){
-//        if(validators.stream().anyMatch(val -> val.validate(obj).isEmpty()))
-//            return Collections.emptyList();
-//
-//        return validators.stream().map(val -> val.validate(obj)).
-//                flatMap(List::stream).collect(Collectors.toList());
-        return null;
+        if(ArrUtils.anyMatch(validators, val -> val.validate(obj).isEmpty()))
+            return new ArrayList<>();
+
+        return ArrUtils.concat(ArrUtils.map(validators, val -> val.validate(obj)));
     }
 
     @SafeVarargs
     public static<T> List<ValidationResult> validate(T obj, Validator<T>... validators){
-//       return validate(obj, Arrays.stream(validators).collect(Collectors.toList()));
-        return null;
+        return validate(obj, ArrUtils.arrToList(validators));
     }
 }

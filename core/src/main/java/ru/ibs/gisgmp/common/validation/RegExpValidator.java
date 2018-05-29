@@ -1,5 +1,8 @@
 package ru.ibs.gisgmp.common.validation;
 
+import ru.ibs.gisgmp.common.utils.StrUtils;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,9 +33,10 @@ public class RegExpValidator implements Validator<String>{
     }
 
     public static List<ValidationResult> validate(String text, String regexp, String path, String errCode){
-//        if(text.matches(regexp))
-//            Collections.singletonList(new ValidationResult(path, errCode));
+        if(StrUtils.matches(text, regexp))
+            return new ArrayList<>();
 
         return Collections.emptyList();
     }
+
 }

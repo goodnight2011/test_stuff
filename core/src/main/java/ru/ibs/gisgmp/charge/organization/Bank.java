@@ -1,9 +1,16 @@
 package ru.ibs.gisgmp.charge.organization;
 
+import ru.ibs.gisgmp.common.validation.CompositeValidator;
+import ru.ibs.gisgmp.common.validation.DelegateValidator;
+import ru.ibs.gisgmp.common.validation.NonNullValidator;
 import ru.ibs.gisgmp.common.validation.ValidationResult;
 import ru.ibs.processor.FieldConst;
 
+import java.util.Arrays;
 import java.util.List;
+
+import static ru.ibs.gisgmp.charge.organization.BankFields.BIK;
+import static ru.ibs.gisgmp.charge.organization.BankFields.CORRESPONDENT_BANK_ACCOUNT;
 
 @FieldConst
 public class Bank {
@@ -36,21 +43,16 @@ public class Bank {
     }
 
     public static List<ValidationResult> validateBik(Bank bank){
-        return null;
-//        return NonNullValidator.validate(bank.getBik(), new DelegateValidator<Bank, Bik>(BIK, Bik::validate, Bank::getBik), BIK, BIK + ".empty");
+        DelegateValidator<Bank, Bik> validator = new DelegateValidator<>(BIK, bik -> bik.validate(), abank -> abank.getBik());
+        return NonNullValidator.validate(bank, validator, BIK, BIK + ".empty");
     }
 
-    public static List<ValidationResult> validate(Bank bank) {
-//        Validator<Bank> bik = NonNullValidator.withNonNull(
-//                new DelegateValidator<>(BIK, Bik::validate, Bank::getBik),
-//                BIK,
-//                BIK + ".empty"
-//        ) ;
-//
-//        Validator<Bank> corrAcc = new DelegateValidator<>(CORRESPONDENT_BANK_ACCOUNT,
-//                AccountNumber::validate, Bank::getCorrespondentBankAccount);
-//
-//        return CompositeValidator.validate(bank, bik, corrAcc);
-        return null;
+    public static List<ValidationResult> validateCorrAcc(Bank bank){
+        DelegateValidator<Bank, AccountNumber> validator = new DelegateValidator<>(CORRESPONDENT_BANK_ACCOUNT,
+                accnum -> accnum.validate(accnum.getString()), bk -> bk.getCorrespondentBankAccount());
+        return validator.validate(bank);
+    }
+    public static List<ValidationResult> validate(Bank abank) {
+        return CompositeValidator.validate(abank, Arrays.asList(Bank::validateBik, Bank::validateCorrAcc));
     }
 }

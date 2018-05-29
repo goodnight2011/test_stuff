@@ -47,27 +47,27 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>ru.ibs</groupId>
-                <artifactId>dbgen-maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
-                <configuration>
-                    <user>postgres</user>
-                    <password>postgres</password>
-                    <outputDirectory>${project.build.directory}/generated-sources/java</outputDirectory>
-                    <rootPackage>ru.ibs.dbgen</rootPackage>
-                    <url>jdbc:postgresql://localhost:5432/</url>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>dbgen</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>dbgen</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>ru.ibs</groupId>-->
+                <!--<artifactId>dbgen-maven-plugin</artifactId>-->
+                <!--<version>1.0-SNAPSHOT</version>-->
+                <!--<configuration>-->
+                    <!--<user>postgres</user>-->
+                    <!--<password>postgres</password>-->
+                    <!--<outputDirectory>${project.build.directory}/generated-sources/java</outputDirectory>-->
+                    <!--<rootPackage>ru.ibs.dbgen</rootPackage>-->
+                    <!--<url>jdbc:postgresql://localhost:5432/</url>-->
+                <!--</configuration>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>dbgen</id>-->
+                        <!--<phase>generate-sources</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>dbgen</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

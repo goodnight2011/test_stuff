@@ -35,6 +35,7 @@ public class DatePeriod {
 
     public String asString(){
 //        return DateTimeFormatter.ofPattern(withDelimiter ? "dd.MM.yyyy" : "ddMMyyyy").format(date);
+
         return null;
     }
 }
