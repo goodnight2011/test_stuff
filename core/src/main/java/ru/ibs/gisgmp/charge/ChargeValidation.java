@@ -1,6 +1,5 @@
 package ru.ibs.gisgmp.charge;
 
-import ru.ibs.dbgen.Users_;
 import ru.ibs.gisgmp.common.validation.ValidationResult;
 
 import java.util.Collections;
@@ -22,7 +21,6 @@ public class ChargeValidation {
     public static List<ValidationResult> validateBillDate(Date date){
 //        if(date == null)
 //            return Arrays.asList(new ValidationResult(""));
-        String some = Users_.ID;
         String another = ChargeFields.BILL_DATE;
         return null;
 

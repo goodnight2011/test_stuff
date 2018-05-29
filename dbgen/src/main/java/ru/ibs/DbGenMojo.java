@@ -5,9 +5,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.*;
@@ -40,7 +38,7 @@ public class DbGenMojo extends AbstractMojo{
     {
         try {
             getLog().info("dbgen: Parsing database metadata.");
-            Map<List<Elem>, List<Elem>> dbmeta = parseDatabaseMetadata(url, user, password);
+            Map<List<Elem>, List<Elem>> dbmeta = parseDatabaseMetadata(url, user, password, getProhibitedTablesNames());
 
             getLog().info("dbgen: Prepare output directory.");
             Path createdPath = prepareDirectory(outputDirectory, rootPackage);
@@ -49,6 +47,12 @@ public class DbGenMojo extends AbstractMojo{
             dbmeta.forEach((path, cols) -> processMeta(rootPackage, createdPath, path, cols));
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static List<String> getProhibitedTablesNames() throws IOException {
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(DbGenMojo.class.getResourceAsStream("/prohibited_tables_names.info"))) ){
+            return reader.lines().collect(Collectors.toList());
         }
     }
 
@@ -99,69 +103,100 @@ public class DbGenMojo extends AbstractMojo{
         return ret;
     }
 
-    private static List<List<Elem>> getTables(DatabaseMetaData meta, Map<Elem, List<Elem>> catSch){
-       if(!catSch.keySet().stream().allMatch(Elem::isCatalog))
-           throw new IllegalArgumentException("some of passed elements aren't of a catalog type");
+    private static List<List<Elem>> getTables(DatabaseMetaData meta, Map<Elem, List<Elem>> catSch, List<String> prohibitedTablesNames){
+        if (!catSch.keySet().stream().allMatch(Elem::isCatalog))
+            throw new IllegalArgumentException("some of passed elements aren't of a catalog type");
 
-       if(!catSch.values().stream().flatMap(List::stream).allMatch(Elem::isSchema))
-           throw new IllegalArgumentException("some of passed elemtns aren't of schema type");
+        if (!catSch.values().stream().flatMap(List::stream).allMatch(Elem::isSchema))
+            throw new IllegalArgumentException("some of passed elemtns aren't of schema type");
 
-       Map<List<Elem>, List<Elem>> mappedTables = new HashMap<>();
+        Map<List<Elem>, List<Elem>> mappedTables = new HashMap<>();
         catSch.forEach((cat, schs) -> {
-            schs.forEach(sch -> {
-                try {
-                    List<Elem> key = Arrays.asList(cat, sch);
-                    mappedTables.put(key, new ArrayList<>());
-                    ResultSet tableRs = meta.getTables(cat.getName(), sch.getName(), null, null);
-                    processTables(mappedTables, key, tableRs);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-            try {
-                List<Elem> key = Arrays.asList(cat, new Elem(DFLT, ElemType.CAT));
-                mappedTables.put(key, new ArrayList<>());
-                ResultSet tableRs = meta.getTables(cat.getName(), null, null, null);
-                processTables(mappedTables, key, tableRs);
-            }
-            catch (Exception e){
-                throw new RuntimeException(e);
-            }
+            schs.forEach(sch -> mappedTables.putAll(processCatalogTables(cat, sch, meta)));
+            mappedTables.putAll(processCatalogTables(cat, null, meta));
         });
 
+        mappedTables.putAll(processCatalogTables(null, null, meta));
+
         return mappedTables.entrySet().stream().filter(entry -> !entry.getValue().isEmpty()).
-                map(entry -> toCatSchmTabList(entry.getKey(), entry.getValue())).
+                map(entry -> toCatSchmTabList(entry.getKey(), entry.getValue(), prohibitedTablesNames)).
                 flatMap(List::stream).collect(Collectors.toList());
 
     }
 
-    private static List<List<Elem>> toCatSchmTabList(List<Elem> catWithSch, List<Elem> tbs){
+    private static void logCatalogScheme(Elem cat, Elem sch){
+//        System.out.println("cat: " + (cat != null ? cat.getName() : "default ") + " sch: "+(sch != null ? sch.getName() : " default"));
+    }
+
+    private static Map<List<Elem>, List<Elem>> processCatalogTables(Elem cat, Elem sch, DatabaseMetaData meta){
+        try {
+            ResultSet tableRs = meta.getTables(cat != null ? cat.getName() : null, sch != null ? sch.getName() : null, null, null);
+            logCatalogScheme(cat, sch);
+            return new HashMap<List<Elem>, List<Elem>>() {{
+                put(
+                        Arrays.asList(
+                                cat != null ? cat : new Elem(DFLT, ElemType.CAT),
+                                sch != null ? sch : new Elem(DFLT, ElemType.SHM)
+                        ),
+                        processTables(tableRs)
+                );
+            }};
+        }
+        catch (Exception e){
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+
+    private static List<List<Elem>> toCatSchmTabList(List<Elem> catWithSch, List<Elem> tbs, List<String> prohibitedTablesNames){
         if(!catWithSch.stream().allMatch(elem -> elem.isCatalog() || elem.isSchema()))
             throw new IllegalStateException("Elements of incorrect types were passed");
 
         if(!tbs.stream().allMatch(elem -> elem.isTable() || elem.isSequence()))
             throw new IllegalArgumentException("Elements should be of table or sequence types");
 
-        return tbs.stream().map(tb -> Stream.concat(catWithSch.stream(), Stream.of(tb)).
-                collect(Collectors.toList())).
+        return tbs.stream().filter(tb -> !prohibitedTablesNames.contains(tb.getName())).
+                map(tb -> Stream.concat(catWithSch.stream(), Stream.of(tb)).
+                        collect(Collectors.toList())).
                 collect(Collectors.toList());
     }
 
-    private static void processTables(Map<List<Elem>, List<Elem>> ret, List<Elem> key, ResultSet tableRs) throws SQLException {
+    private static void logTables(ResultSet tableRs){
+//        List<String> colNames = Arrays.asList(
+//                "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "TABLE_TYPE", "REMARKS",
+//                "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "SELF_REFERENCING_COL_NAME",
+//                "REF_GENERATION"
+//        );
+//
+//        colNames.forEach(col -> {
+//            try{
+//               System.out.print(" " + col + ": " + tableRs.getString(col));
+//            }
+//            catch (Exception e){
+//                System.out.print(" " + col+": failed");
+//            }
+//        });
+//        System.out.println();
+    }
+
+    private static List<Elem> processTables(ResultSet tableRs) throws SQLException {
+        List<Elem> tables = new ArrayList<>();
         while (tableRs.next()) {
+            logTables(tableRs);
             String tname = tableRs.getString("TABLE_NAME");
             String ttype = tableRs.getString("TABLE_TYPE");
             if (!emptyStr(tname) && ttype != null && !ttype.contains("SYSTEM") && !ttype.contains("INDEX")) {
                 ElemType tableType = null;
-                if(ttype.equals("TABLE"))
+                if(ttype.equals("TABLE") || ttype.equals("VIEW"))
                     tableType = ElemType.TB;
                 else if(ttype.equals("SEQUENCE"))
                     tableType = ElemType.SEQ;
                 else throw new IllegalArgumentException("Unknown table type: " + ttype);
-                ret.get(key).add(new Elem(tname, tableType));
+                tables.add(new Elem(tname, tableType));
             }
         }
+
+        return  tables;
     }
 
     private static Map<List<Elem>, List<Elem>> getColumns(DatabaseMetaData meta, List<List<Elem>> catShmTb){
@@ -191,18 +226,19 @@ public class DbGenMojo extends AbstractMojo{
                throw new RuntimeException(e);
             }
         });
+//        ret.forEach((x, y) -> y.forEach(name -> System.out.print("\""+name.getName()+"\",")));
 
         return ret;
     }
 
     private static Map<List<Elem>, List<Elem>> parseDatabaseMetadata(
-            String url, String user, String password
-    ){
+            String url, String user, String password,
+            List<String> prohibitedTablesNames){
         try {
             Connection conn = DriverManager.getConnection(url, user, password);
             DatabaseMetaData meta = conn.getMetaData();
 
-            return getColumns(meta, getTables(meta, getSchemas(meta, getCatalogs(meta))));
+            return getColumns(meta, getTables(meta, getSchemas(meta, getCatalogs(meta)), prohibitedTablesNames));
         }
         catch (Exception e){
             throw new RuntimeException(e);
@@ -303,23 +339,25 @@ public class DbGenMojo extends AbstractMojo{
 
     private static String tableToClassName(String tableName){
         return Arrays.stream(tableName.split("_")).
+                filter(str -> !str.isEmpty()).
                 map(DbGenMojo::toUpperFirstLetter).
                 collect(Collectors.joining()) + "_";
     }
 
     private static String colToFieldName(String colName){
-       List<String> subPahts = Arrays.asList(colName.split("_"));
-       return (subPahts.get(0) + (subPahts.size() > 1 ? subPahts.subList(1, subPahts.size()).stream().
-               map(DbGenMojo::toUpperFirstLetter).
-               collect(Collectors.toList()) : "")).toUpperCase();
+        return colName.toUpperCase();
+//       List<String> subPahts = Arrays.asList(colName.split("_"));
+
+//       return (subPahts.get(0) + (subPahts.size() > 1 ? subPahts.subList(1, subPahts.size()).stream().
+//               collect(Collectors.joining("_")) : "")).toUpperCase();
     }
 
     //for test
     public static void main(String[] args){
         try {
-            Map<List<Elem>, List<Elem>> dbmeta = parseDatabaseMetadata("jdbc:postgresql://localhost:5432/", "postgres", "postgres");
+            Map<List<Elem>, List<Elem>> dbmeta = parseDatabaseMetadata("jdbc:postgresql://localhost:5432/gisgmp", "postgres", "postgres", getProhibitedTablesNames());
 
-            Path createdPath = prepareDirectory("/home/avb/projects/test_stuff_new/ofDbGen", "ru.ibs.dbgen");
+            Path createdPath = prepareDirectory("D://out", "ru.ibs.dbgen");
 
             dbmeta.forEach((path, cols) -> processMeta("ru.ibs.dbgen", createdPath, path, cols));
         } catch (Exception e) {
@@ -328,3 +366,4 @@ public class DbGenMojo extends AbstractMojo{
     }
 
 }
+
