@@ -31,7 +31,7 @@ public class TaxPeriod {
         this.datePeriod = datePeriod;
     }
 
-    public static List<ValidationResult> validateTypedPeriod(TaxPeriod period){
+    public static List<ValidationResult> validate(TaxPeriod period){
         if(period.getTypedPeriod() != null)
             return TypedPeriod.validate(period.getTypedPeriod());
         else if(period.getDatePeriod() != null)

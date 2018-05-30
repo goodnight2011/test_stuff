@@ -1,9 +1,12 @@
 package ru.ibs.gisgmp.charge.requisites.period;
 
+import ru.ibs.gisgmp.common.utils.DateUtils;
+import ru.ibs.gisgmp.common.validation.CompositeValidator;
 import ru.ibs.gisgmp.common.validation.NonNullValidator;
 import ru.ibs.gisgmp.common.validation.ValidationResult;
 import ru.ibs.processor.FieldConst;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -73,15 +76,13 @@ public class TypedPeriod {
     }
 
     public String asString(){
-        return null;
-//       return type.getCode() + "." + String.format("%02d", periodNumber) + "." + String.format("%04d", year);
+       return type.getCode() + "." + DateUtils.pad2digits(periodNumber) + "." + year;
     }
 
     public static List<ValidationResult> validate(TypedPeriod typedPeriod){
-        return null;
-//       return CompositeValidator.validate(typedPeriod,
-//               TypedPeriod::validatePeriod,
-//               TypedPeriod::validateType,
-//               TypedPeriod::validateYear);
+        return CompositeValidator.validate(typedPeriod, Arrays.asList(
+                TypedPeriod::validatePeriod,
+                TypedPeriod::validateType,
+                TypedPeriod::validateYear));
     }
 }

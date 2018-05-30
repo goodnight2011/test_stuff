@@ -1,6 +1,7 @@
 package ru.ibs.gisgmp.charge;
 
 import ru.ibs.gisgmp.common.StringBased;
+import ru.ibs.gisgmp.common.utils.StrUtils;
 import ru.ibs.gisgmp.common.validation.ValidationResult;
 
 import java.util.Collections;
@@ -13,8 +14,8 @@ public class Inn extends StringBased{
     }
 
     public static List<ValidationResult> validateFormat(String str){
-//        if(str.matches("[0-9]{10}") && str.charAt(0) != '0' && str.charAt(1) != '0')
-//            return Collections.emptyList();
+        if(StrUtils.matches(str, "[0-9]{10}") && str.charAt(0) != '0' && str.charAt(1) != '0')
+            return Collections.emptyList();
 
         return Collections.singletonList(new ValidationResult("", "format"));
     }

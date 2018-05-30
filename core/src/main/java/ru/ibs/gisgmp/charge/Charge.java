@@ -3,14 +3,15 @@ package ru.ibs.gisgmp.charge;
 import ru.ibs.gisgmp.charge.organization.Oktmo;
 import ru.ibs.gisgmp.charge.organization.Organization;
 import ru.ibs.gisgmp.charge.payer.UnifiedPayerIdentifier;
+import ru.ibs.gisgmp.common.utils.ArrUtils;
+import ru.ibs.gisgmp.common.utils.DateUtils;
+import ru.ibs.gisgmp.common.validation.CompositeValidator;
 import ru.ibs.gisgmp.common.validation.NonNullValidator;
 import ru.ibs.gisgmp.common.validation.ValidationResult;
 import ru.ibs.processor.FieldConst;
 import static ru.ibs.gisgmp.charge.ChargeFields.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @FieldConst
 public class Charge {
@@ -122,19 +123,38 @@ public class Charge {
 //                        Organization::)
 //
 //        );
-        return null;
+//        return null;
+        return ArrUtils.concat(Arrays.asList(
+                NonNullValidator.validate(charge.getSupplierBillId(), suppl -> SupplierBillId.validateFormat2(suppl.getString()), SUPPLIER_BILL_ID, SUPPLIER_BILL_ID + ".empty"),
+                validateBillDate(charge),
+                validateSupplierOrgInfo(charge),
+                NonNullValidator.notEmptyString(charge.getBillFor(), BILL_FOR, BILL_FOR + ".empty"),
+                validateTotalAmount(charge),
+                NonNullValidator.validate(charge.getKbk(), kbk -> kbk.validate(), KBK, KBK  +".empty"),
+                NonNullValidator.validate(charge.getOktmo(), oktmo -> oktmo.validate(), OKTMO, OKTMO + ".empty")/*,
+                NonNullValidator.validate(charge.geG)*/
+        ));
+    }
+
+    public static List<ValidationResult> validateTotalAmount(Charge charge){
+       return charge.getTotalAmount() < 0 ? Arrays.asList(new ValidationResult(TOTAL_AMOUNT, TOTAL_AMOUNT + ".incorrect")) :
+               Collections.emptyList();
+    }
+
+    public static List<ValidationResult> validateReason(Charge charge){
+       if(charge.getMeaning() != null && !charge.getMeaning().equals(Meaning.NEW))
+           return NonNullValidator.notEmptyString(charge.getReason(), REASON, REASON + ".empty");
+       return Collections.emptyList();
     }
 
     public static List<ValidationResult> validateBillDate(Charge charge){
-       List<ValidationResult> res = new ArrayList<>();
-       res.addAll(NonNullValidator.validate(charge.getBillDate(), BILL_DATE, BILL_DATE + ".empty"));
-       if(res.isEmpty()){
+        return NonNullValidator.validate(charge.getBillDate(), date -> {
+            boolean cmp = DateUtils.compare(DateUtils.createDate(2013, 0,1), date) > 0;
+            return cmp ? Arrays.asList(new ValidationResult(BILL_DATE, BILL_DATE +".too_early")): Collections.emptyList();
+        }, BILL_DATE, BILL_DATE + ".empty");
+    }
 
-//           if(LocalDate.of(2013, 1, 1).isAfter(charge.getBillDate()))
-//               res.add(new ValidationResult(BILL_DATE, BILL_DATE + ".early"));
-           //TODO: Добавить проверку, что не превышает дату загрузки более чем на один день
-       }
-
-       return res;
+    public static List<ValidationResult> validateSupplierOrgInfo(Charge charge){
+       return NonNullValidator.validate(charge.getSupplierOrgInfo(), SUPPLIER_ORG_INFO, SUPPLIER_ORG_INFO + ".empty");
     }
 }

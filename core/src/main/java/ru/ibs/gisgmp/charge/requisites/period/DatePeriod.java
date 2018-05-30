@@ -1,5 +1,6 @@
 package ru.ibs.gisgmp.charge.requisites.period;
 
+import ru.ibs.gisgmp.common.utils.DateUtils;
 import ru.ibs.gisgmp.common.validation.NonNullValidator;
 import ru.ibs.gisgmp.common.validation.ValidationResult;
 import ru.ibs.processor.FieldConst;
@@ -33,9 +34,7 @@ public class DatePeriod {
         return NonNullValidator.validate(period.getDate(), DATE, DATE + ".empty");
     }
 
-    public String asString(){
-//        return DateTimeFormatter.ofPattern(withDelimiter ? "dd.MM.yyyy" : "ddMMyyyy").format(date);
-
-        return null;
+    public String asString() {
+        return DateUtils.format(date, withDelimiter ? "." : "", false);
     }
 }

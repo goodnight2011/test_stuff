@@ -34,4 +34,9 @@ public class NonNullValidator<T> implements Validator<T> {
     public static<T> List<ValidationResult> validate(T obj, Validator<T> validator, String path, String errCode){
         return withNonNull(validator, path, errCode).validate(obj);
     }
+
+    public static List<ValidationResult> notEmptyString(String str, String path, String errCode){
+       return str != null && str.trim().isEmpty() ? Collections.emptyList() :
+               Collections.singletonList(new ValidationResult(path, errCode));
+    }
 }

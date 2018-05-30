@@ -4,6 +4,7 @@ import jsweet.lang.Replace;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class DateUtils {
 
@@ -28,6 +29,11 @@ public class DateUtils {
         return c.get(Calendar.MONTH);
     }
 
+    @Replace("return new Date(year, month, day);")
+    public static Date createDate(int day, int month, int year){
+       return new GregorianCalendar(year, month, day).getTime();
+    }
+
     public static String pad2digits(int val){
        return val < 10 ? "0" + val : "" + val;
     }
@@ -49,13 +55,25 @@ public class DateUtils {
            String[] arr;
            if(!delimiter.isEmpty()){
               arr = str.split(delimiter);
-           }
-           else arr = new String[]{
-                isInverse ? str.substring()
+              if(isInverse)
+                  arr = new String[]{arr[2], arr[1], arr[0]};
+           } else arr = new String[]{
+                   isInverse ? str.substring(6, 8) : str.substring(0, 2),
+                   isInverse ? str.substring(4, 6) : str.substring(2, 4),
+                   isInverse ? str.substring(6, 10) : str.substring(4, 8)
            };
+           int day = Integer.parseInt(arr[0]);
+           int month = Integer.parseInt(arr[1]);
+           int year = Integer.parseInt(arr[2]);
+           return createDate(year, month, day);
        }
        catch(Exception e){
            return null;
        }
+    }
+
+    @Replace("return one.getTime() - two.getTime();")
+    public static int compare(Date one, Date two){
+       return one.compareTo(two);
     }
 }
