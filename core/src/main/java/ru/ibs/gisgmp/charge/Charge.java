@@ -3,6 +3,7 @@ package ru.ibs.gisgmp.charge;
 import ru.ibs.gisgmp.charge.organization.Oktmo;
 import ru.ibs.gisgmp.charge.organization.Organization;
 import ru.ibs.gisgmp.charge.payer.UnifiedPayerIdentifier;
+import ru.ibs.gisgmp.charge.requisites.BudgetIndex;
 import ru.ibs.gisgmp.common.utils.ArrUtils;
 import ru.ibs.gisgmp.common.utils.DateUtils;
 import ru.ibs.gisgmp.common.validation.CompositeValidator;
@@ -25,6 +26,7 @@ public class Charge {
     private String reason;
     private Kbk kbk;
     private Oktmo oktmo;
+    private BudgetIndex budgetIndex;
     private UnifiedPayerIdentifier unifiedPayerIdentifier;
 
     public SupplierBillId getSupplierBillId() {
@@ -115,15 +117,15 @@ public class Charge {
         this.unifiedPayerIdentifier = unifiedPayerIdentifier;
     }
 
+    public BudgetIndex getBudgetIndex() {
+        return budgetIndex;
+    }
+
+    public void setBudgetIndex(BudgetIndex budgetIndex) {
+        this.budgetIndex = budgetIndex;
+    }
+
     public static List<ValidationResult> validate(Charge charge){
-//        return CompositeValidator.validate(charge,
-//                new DelegateValidator<>(SUPPLIER_BILL_ID, StringBased::validate, Charge::getSupplierBillId),
-//                Charge::validateBillDate,
-//                new CompositeValidator<>(new NonNullValidator<>(SUPPLIER_ORG_INFO, SUPPLIER_ORG_INFO+".empty"),
-//                        Organization::)
-//
-//        );
-//        return null;
         return ArrUtils.concat(Arrays.asList(
                 NonNullValidator.validate(charge.getSupplierBillId(), suppl -> SupplierBillId.validateFormat2(suppl.getString()), SUPPLIER_BILL_ID, SUPPLIER_BILL_ID + ".empty"),
                 validateBillDate(charge),
@@ -131,8 +133,10 @@ public class Charge {
                 NonNullValidator.notEmptyString(charge.getBillFor(), BILL_FOR, BILL_FOR + ".empty"),
                 validateTotalAmount(charge),
                 NonNullValidator.validate(charge.getKbk(), kbk -> kbk.validate(), KBK, KBK  +".empty"),
-                NonNullValidator.validate(charge.getOktmo(), oktmo -> oktmo.validate(), OKTMO, OKTMO + ".empty")/*,
-                NonNullValidator.validate(charge.geG)*/
+                NonNullValidator.validate(charge.getOktmo(), oktmo -> oktmo.validate(), OKTMO, OKTMO + ".empty"),
+                NonNullValidator.validate(charge.getBudgetIndex(), BudgetIndex::validate, BUDGET_INDEX, BUDGET_INDEX + ".empty"),
+                NonNullValidator.validate(charge.getUnifiedPayerIdentifier(), UnifiedPayerIdentifier::validate,
+                        UNIFIED_PAYER_IDENTIFIER, UNIFIED_PAYER_IDENTIFIER + ".empty")
         ));
     }
 

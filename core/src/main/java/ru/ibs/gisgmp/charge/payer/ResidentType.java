@@ -1,7 +1,7 @@
 package ru.ibs.gisgmp.charge.payer;
 
 public enum ResidentType {
-    RESIDENT(2, "Резидент РФ"), NOT_RESIDENT(3, "Нерезидент РФ"), NOT_RESIDENT_WITH_KIO(3, "Нерезидент РФ(при наличии КИО)");
+    RESIDENT(2, "Резидент РФ"), NOT_RESIDENT_WITH_INN(3, "Нерезидент РФ"), NOT_RESIDENT_WITH_KIO(3, "Нерезидент РФ(при наличии КИО)");
 
     private int code;
     private String name;
